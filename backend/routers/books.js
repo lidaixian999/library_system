@@ -2,6 +2,15 @@ const express = require('express');
 const router = express.Router();
 const db = require('../db');
 
+router.get('/ai/analysis', async (req, res) => {
+  const { bookId } = req.query;
+  // 模拟 AI 分析结果
+  res.json({
+    readingTime: '约3小时',
+    evaluation: '内容丰富，结构清晰',
+    suitableFor: '中学生及以上'
+  });
+});
 
 // controllers/books.js
 router.get('/', async (req, res) => {

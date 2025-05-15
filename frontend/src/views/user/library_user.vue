@@ -187,13 +187,13 @@
         width="60%"
       >
         <div class="book-detail">
-          <el-row :gutter="20">
+          <el-row :gutter="10">
             <el-col :span="8">
               <div class="detail-cover">
                 <img :src="currentBook.cover || defaultCover" alt="图书封面">
               </div>
             </el-col>
-            <el-col :span="16">
+            <el-col :span="8">
               <div class="detail-info">
                 <h2>{{ currentBook.title }}</h2>
                 <p><span>作者：</span>{{ currentBook.author }}</p>
@@ -201,19 +201,33 @@
                 <p><span>出版日期：</span>{{ currentBook.publishDate }}</p>
                 <p><span>ISBN:</span>{{ currentBook.isbn }}</p>
                 <p><span>库存：</span>{{ currentBook.stock }}本</p>
-                <el-rate
-                  v-model="currentBook.rating"
-                  disabled
-                  show-score
-                  text-color="#ff9900"
-                  score-template="{value}分"
-                />
                 <div class="book-description">
                   <h3>内容简介</h3>
                   <p>{{ currentBook.description }}</p>
                 </div>
               </div>
             </el-col>
+            <!-- todo 添加ai分析 -->
+             
+    <!-- 右侧新加内容 -->
+    <el-col :span="6">
+      <el-card shadow="hover">
+        <!-- 彩色 AI分析按钮 -->
+        <el-button type="primary" color="#626aef" @click="fetchAIAnalysis" plain>
+          AI分析
+        </el-button>
+
+        <!-- 分析内容展示 -->
+        <div v-if="aiData" style="margin-top: 20px;">
+          <p><strong>阅读时间：</strong>{{ aiData.readingTime }}</p>
+          <p><strong>图书评价：</strong>{{ aiData.evaluation }}</p>
+          <p><strong>适合人群：</strong>{{ aiData.suitableFor }}</p>
+        </div>
+
+        <!-- 加载中状态 -->
+        <el-skeleton v-else :rows="3" animated style="margin-top: 20px;" />
+      </el-card>
+    </el-col>
           </el-row>
         </div>
         <template #footer>
@@ -230,6 +244,20 @@
   import { Search, Grid, List } from '@element-plus/icons-vue'
   import { useNavigation } from '@/utils/Select'
   
+const aiData = ref(null)
+const fetchAIAnalysis = async () => {
+  try {
+    const response = await axios.get('http://localhost:8989/api/books/ai/analysis', {
+      params: {
+        bookId: 1 // 替换为当前图书 ID
+      }
+    })
+    aiData.value = response.data
+  } catch (error) {
+    ElMessage.error('AI分析获取失败')
+  }
+}
+
   // 默认封面图
   const defaultCover = 'https://via.placeholder.com/200x280?text=No+Cover'
   
@@ -356,6 +384,7 @@ const fetchBooks = async () => {
   </script>
   
   <style scoped>
+  
   /* 整体布局 */
   .book-query-container {
     display: flex;
@@ -637,5 +666,9 @@ const fetchBooks = async () => {
     .view-options {
       align-self: flex-end;
     }
+
+    
+    
   }
+  
   </style>
