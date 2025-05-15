@@ -38,6 +38,7 @@ router.get('/', async (req, res) => {
   res.json({ books: rows, total })
 })
 
+
 // 新增一本图书
 router.post('/', async (req, res) => {
   const { 
@@ -53,7 +54,7 @@ router.post('/', async (req, res) => {
   } = req.body;
 
   // 验证必选字段
-  if (!isbn || !title || !author || !category || !totalCopies || !availableCopies || !location) {
+  if (!isbn || !title || !author || !category || !totalCopies || !availableCopies ) {
     return res.status(400).json({ error: '缺少必选字段' });
   }
 

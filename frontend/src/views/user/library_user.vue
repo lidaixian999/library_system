@@ -225,6 +225,7 @@
   </template>
   
   <script setup>
+  import axios from 'axios'
   import { ref, reactive, onMounted } from 'vue'
   import { Search, Grid, List } from '@element-plus/icons-vue'
   import { useNavigation } from '@/utils/Select'
@@ -330,66 +331,24 @@
     ElMessage.success(`《${book.title}》已加入借阅车`)
     detailDialogVisible.value = false
   }
-  
-  // 获取图书列表
-  const fetchBooks = () => {
-    // 模拟API请求
-    const mockData = []
-    for (let i = 0; i < 120; i++) {
-      const categoryIndex = i % categories.value.length
-      mockData.push({
-        id: i + 1,
-        isbn: `9787${Math.floor(100000 + Math.random() * 900000)}`,
-        title: `图书名称${i + 1}`,
-        author: `作者${i + 1}`,
-        publisher: `出版社${i + 1}`,
-        publishDate: `202${Math.floor(Math.random() * 3)}-${Math.floor(Math.random() * 12) + 1}-${Math.floor(Math.random() * 28) + 1}`,
-        category: categories.value[categoryIndex].value,
-        price: (Math.random() * 100).toFixed(2),
-        stock: Math.floor(Math.random() * 10) + 1,
-        rating: (Math.random() * 5).toFixed(1),
-        cover: i % 4 === 0 ? '' : `https://picsum.photos/200/280?random=${i}`,
-        description: `这是图书${i + 1}的简介，内容非常丰富，值得一读。这是图书${i + 1}的简介，内容非常丰富，值得一读。这是图书${i + 1}的简介，内容非常丰富，值得一读。`
-      })
-    }
-    
-    // 模拟搜索过滤
-    let filteredData = [...mockData]
-    if (searchForm.keyword) {
-      const keyword = searchForm.keyword.toLowerCase()
-      filteredData = filteredData.filter(book => 
-        book.title.toLowerCase().includes(keyword) || 
-        book.author.toLowerCase().includes(keyword) ||
-        book.isbn.includes(keyword)
-      )
-    }
-    if (searchForm.category) {
-      filteredData = filteredData.filter(book => book.category === searchForm.category)
-    }
-    
-    // 模拟排序
-    switch (sortOption.value) {
-      case 'popular':
-        filteredData.sort((a, b) => b.rating - a.rating)
-        break
-      case 'publishDate':
-        filteredData.sort((a, b) => new Date(b.publishDate) - new Date(a.publishDate))
-        break
-      case 'price':
-        filteredData.sort((a, b) => a.price - b.price)
-        break
-      default:
-        // 默认排序不做处理
-        break
-    }
-    
-    // 模拟分页
-    const start = (pagination.currentPage - 1) * pagination.pageSize
-    const end = start + pagination.pageSize
-    bookList.value = filteredData.slice(start, end)
-    pagination.total = filteredData.length
+const fetchBooks = async () => {
+  try {
+    const res = await axios.get('http://localhost:8989/api/books', {
+      params: {
+        ...searchForm, // 直接展开searchForm
+        page: pagination.currentPage,
+        pageSize: pagination.pageSize
+      }
+    })
+    // 后端返回的数据结构应该是 { books: [...], total: 100 }
+    bookList.value = res.data.books
+    pagination.total = res.data.total
+  } catch (err) {
+    console.error('获取图书失败', err)
+    ElMessage.error('获取图书失败，请检查网络或后端接口')
   }
-  
+}
+
   // 组件挂载时获取数据
   onMounted(() => {
     fetchBooks()
