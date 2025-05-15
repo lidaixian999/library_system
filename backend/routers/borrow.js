@@ -6,19 +6,16 @@ const db = require('../db');
 // 借书
 router.post('/borrow', async (req, res) => {
   const { user_id, book_id } = req.body;
-
   // 检查图书状态
   const [bookRows] = await db.query('SELECT * FROM books WHERE id = ?', [book_id]);
   if (bookRows.length === 0 || bookRows[0].status !== 'available') {
     return res.status(400).json({ error: 'Book not available' });
   }
-
   // 插入借阅记录
   await db.query(
     'INSERT INTO borrow_records (user_id, book_id) VALUES (?, ?)',
     [user_id, book_id]
   );
-
   // 修改图书状态为 borrowed
   await db.query('UPDATE books SET status = ? WHERE id = ?', ['borrowed', book_id]);
 
