@@ -24,11 +24,11 @@
           <el-dropdown>
             <span class="el-dropdown-link">
               <el-avatar :size="40" :src="userAvatarref" />
-              <span class="username">管理员</span>
+              <span class="username">用户</span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
                 <el-dropdown-item>系统设置</el-dropdown-item>
                 <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
@@ -107,15 +107,15 @@
           </div>
         </div>
         <div class="copyright">
-          <p>© 2025 王禹涵 版权所有</p>
+          <p>© 2025 216 版权所有</p>
         </div>
       </footer>
     </div>
   </template>
   
   <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { ref, computed } from 'vue'
+  import { useRouter,useRoute } from 'vue-router'
   import {
     User,
     Lock,
@@ -137,14 +137,45 @@
   import banner3 from '@/assets/photo/banner3.jpg'
   import banner4 from '@/assets/photo/banner4.jpg'
   const router = useRouter()
+  const route = useRoute()
   // 暴露图片给模板使用
   const logoUrlref = ref(logoUrl)
   const userAvatarref = ref(userAvatar)
   // 导航菜单
-  const activeIndex = ref('1')
-  const handleSelect = (key) => {
-    console.log('选中菜单:', key)
+  const activeIndex = computed(() => {
+  switch (route.path) {
+    case '/home_user': return '1'
+    case '/library_user': return '2'
+    case '/resources_user': return '3'
+    case '/campus_life': return '4'
+    case '/about': return '5'
+    default: return '1'
   }
+})
+const goToProfile = () => {
+  router.push('/user_people') // 个人中心
+}
+const handleSelect = (key) => {
+  switch (key) {
+    case '1':
+      router.push('/home_user') // 首页
+      break
+    case '2':
+      router.push('/library_user') // 图书馆
+      break
+    case '3':
+      router.push('/resources_user') // 教学资源
+      break
+    case '4':
+      router.push('/campus_life') // 校园生活
+      break
+    case '5':
+      router.push('/about') // 关于我们
+      break
+    default:
+      break
+  }
+}
   const getBannerImage = (index) => {
   return banners.value[index].image
 }
@@ -158,12 +189,12 @@
   
   // 快速入口
   const quickAccess = ref([
-    { title: '图书查询与管理', desc: '查询馆藏图书信息，管理图书借阅', icon: Reading, path: '/library_controller' },
-    { title: '图书借阅', desc: '借阅馆藏可借图书', icon: Notebook, path: '/borrow' },
-    { title: '学习资源', desc: '访问学习所需资料', icon: School, path: '/resources' },
-    { title: '校历查询', desc: '查看学校校历安排', icon: Calendar, path: '/calendar' },
-    { title: '文件下载', desc: '下载各类表格文件', icon: Document, path: '/download' },
-    { title: '系统公告', desc: '查看系统公告信息', icon: Bell, path: '/notice' }
+    { title: '图书查询', desc: '查询馆藏图书信息', icon: Reading, path: '/library_user' },
+    { title: '我的借阅', desc: '您目前借阅的书籍', icon: Notebook, path: '/borrow_user' },
+    { title: '学习资源', desc: '访问学习所需资料', icon: School, path: '/resources_user' },
+    { title: '校历查询', desc: '查看学校校历安排', icon: Calendar, path: '/calendar_user' },
+    { title: '文件下载', desc: '下载各类表格文件', icon: Document, path: '/download_user' },
+    { title: '系统公告', desc: '查看系统公告信息', icon: Bell, path: '/notice_user' }
   ])
   
   // 新闻公告

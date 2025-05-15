@@ -87,70 +87,75 @@
         />
       </div>
   
+      <!-- 编辑图书对话框 -->
       <!-- 新增/编辑图书对话框 -->
-      <el-dialog
-        v-model="dialogVisible"
-        :title="dialogTitle"
-        width="50%"
-        :before-close="handleCloseDialog"
-      >
-        <el-form ref="bookForm" :model="bookForm" :rules="rules" label-width="100px">
-          <el-form-item label="ISBN" prop="isbn">
-            <el-input v-model="bookForm.isbn" placeholder="请输入ISBN" />
-          </el-form-item>
-          <el-form-item label="书名" prop="title">
-            <el-input v-model="bookForm.title" placeholder="请输入书名" />
-          </el-form-item>
-          <el-form-item label="作者" prop="author">
-            <el-input v-model="bookForm.author" placeholder="请输入作者" />
-          </el-form-item>
-          <el-form-item label="分类" prop="category">
-            <el-select v-model="bookForm.category" placeholder="请选择分类">
-              <el-option
-                v-for="item in categories"
-                :key="item.value"
-                :label="item.label"
-                :value="item.value"
-              />
-            </el-select>
-          </el-form-item>
-          <el-form-item label="总数量" prop="totalCopies">
-            <el-input-number v-model="bookForm.totalCopies" :min="1" />
-          </el-form-item>
-          <el-form-item label="可借数量" prop="availableCopies">
-            <el-input-number v-model="bookForm.availableCopies" :min="0" :max="bookForm.totalCopies" />
-          </el-form-item>
-          <el-form-item label="位置" prop="location">
-            <el-input v-model="bookForm.location" placeholder="请输入位置" />
-          </el-form-item>
-          <el-form-item label="封面" prop="cover">
-            <el-upload
-              class="avatar-uploader"
-              action="#"
-              :show-file-list="false"
-              :auto-upload="false"
-              :on-change="handleCoverChange"
-            >
-              <img v-if="bookForm.cover" :src="bookForm.cover" class="avatar" />
-              <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
-            </el-upload>
-          </el-form-item>
-          <el-form-item label="简介" prop="description">
-            <el-input
-              v-model="bookForm.description"
-              type="textarea"
-              :rows="4"
-              placeholder="请输入图书简介"
-            />
-          </el-form-item>
-        </el-form>
-        <template #footer>
-          <span class="dialog-footer">
-            <el-button @click="dialogVisible = false">取消</el-button>
-            <el-button type="primary" @click="submitForm">确定</el-button>
-          </span>
-        </template>
-      </el-dialog>
+  <el-dialog
+    v-model="dialogVisible"
+    :title="dialogTitle"
+    width="50%"
+    :before-close="handleCloseDialog"
+  >
+    <el-form ref="bookForm" :model="currentBook" :rules="rules" label-width="100px">
+      <el-form-item label="ISBN" prop="isbn">
+        <el-input v-model="currentBook.isbn" placeholder="请输入ISBN" />
+      </el-form-item>
+      <el-form-item label="书名" prop="title">
+        <el-input v-model="currentBook.title" placeholder="请输入书名" />
+      </el-form-item>
+      <el-form-item label="作者" prop="author">
+        <el-input v-model="currentBook.author" placeholder="请输入作者" />
+      </el-form-item>
+      <el-form-item label="分类" prop="category">
+        <el-select v-model="currentBook.category" placeholder="请选择分类">
+          <el-option
+            v-for="item in categories"
+            :key="item.value"
+            :label="item.label"
+            :value="item.value"
+          />
+        </el-select>
+      </el-form-item>
+      <el-form-item label="总数量" prop="totalCopies">
+        <el-input-number v-model="currentBook.totalCopies" :min="1" />
+      </el-form-item>
+      <el-form-item label="可借数量" prop="availableCopies">
+        <el-input-number 
+          v-model="currentBook.availableCopies" 
+          :min="0" 
+          :max="currentBook.totalCopies" 
+        />
+      </el-form-item>
+      <el-form-item label="位置" prop="location">
+        <el-input v-model="currentBook.location" placeholder="请输入位置" />
+      </el-form-item>
+      <el-form-item label="封面" prop="cover">
+        <el-upload
+          class="avatar-uploader"
+          action="#"
+          :show-file-list="false"
+          :auto-upload="false"
+          :on-change="handleCoverChange"
+        >
+          <img v-if="currentBook.cover" :src="currentBook.cover" class="avatar" />
+          <el-icon v-else class="avatar-uploader-icon"><Plus /></el-icon>
+        </el-upload>
+      </el-form-item>
+      <el-form-item label="简介" prop="description">
+        <el-input
+          v-model="currentBook.description"
+          type="textarea"
+          :rows="4"
+          placeholder="请输入图书简介"
+        />
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="dialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="submitForm">确定</el-button>
+      </span>
+    </template>
+  </el-dialog>
     </div>
   </template>
   
@@ -159,7 +164,7 @@
   import { ref, reactive, onMounted } from 'vue'
   import { ElMessage, ElMessageBox } from 'element-plus'
   import { Plus, Delete, Download } from '@element-plus/icons-vue'
-  
+  const bookForm = ref(null)
   // 图书分类选项
   const categories = ref([
     { value: 'literature', label: '文学' },
@@ -195,19 +200,19 @@
   // 对话框相关
   const dialogVisible = ref(false)
   const dialogTitle = ref('新增图书')
-  const bookForm = reactive({
-    isbn: '',
-    title: '',
-    author: '',
-    publisher: '',
-    publishDate: '',
-    category: '',
-    totalCopies: 1,
-    availableCopies: 1,
-    location: '',
-    cover: '',
-    description: ''
-  })
+  const isEditMode = ref(false) // 新增编辑模式标识
+  const currentBook = reactive({
+  id: '',
+  isbn: '',
+  title: '',
+  author: '',
+  category: '',
+  totalCopies: 1,
+  availableCopies: 1,
+  location: '',
+  cover: '',
+  description: ''
+})
   
   // 表单验证规则
   const rules = reactive({
@@ -266,17 +271,31 @@
   // 新增图书
   const handleAdd = () => {
     dialogTitle.value = '新增图书'
-    Object.keys(bookForm).forEach(key => {
-      bookForm[key] = key === 'totalCopies' ? 1 : key === 'availableCopies' ? 1 : ''
-    })
+    isEditMode.value = false
+    resetCurrentBook()
     dialogVisible.value = true
+  }
+  
+  // 重置当前图书表单
+  const resetCurrentBook = () => {
+    Object.keys(currentBook).forEach(key => {
+      if (key === 'totalCopies') {
+        currentBook[key] = 1
+      } else if (key === 'availableCopies') {
+        currentBook[key] = 1
+      } else {
+        currentBook[key] = ''
+      }
+    })
   }
   
   // 编辑图书
   const handleEdit = (row) => {
     dialogTitle.value = '编辑图书'
-    Object.keys(bookForm).forEach(key => {
-      bookForm[key] = row[key]
+    isEditMode.value = true
+    // 深拷贝图书数据到currentBook
+    Object.keys(currentBook).forEach(key => {
+      currentBook[key] = row[key]
     })
     dialogVisible.value = true
   }
@@ -301,7 +320,6 @@
       }
     }
   }
-  
   
   // 批量删除
   const handleBatchDelete = async () => {
@@ -337,7 +355,7 @@
     // 这里简单处理，实际项目中需要上传到服务器
     const reader = new FileReader()
     reader.onload = (e) => {
-      bookForm.cover = e.target.result
+      currentBook.cover = e.target.result
     }
     reader.readAsDataURL(file.raw)
   }
@@ -357,24 +375,30 @@
   
   // 提交表单
   const submitForm = async () => {
-  try {
-    if (dialogTitle.value === '新增图书') {
-      await axios.post(apiBase, bookForm)
-      ElMessage.success('新增成功')
-    } else {
-      await axios.put(`${apiBase}/${bookForm.id}`, bookForm)
-      ElMessage.success('更新成功')
+  bookForm.value.validate(async (valid) => {
+    if (!valid) return
+    // 如果没有上传封面，cover 设为 null
+    if (!currentBook.cover) {
+      currentBook.cover = null
     }
-    dialogVisible.value = false
-    fetchBooks()
-  } catch (err) {
-    ElMessage.error('保存失败')
-  }
+    try {
+      if (isEditMode.value) {
+        await axios.put(`http://localhost:8989/api/books/${currentBook.id}`, currentBook)
+        ElMessage.success('更新成功')
+      } else {
+        await axios.post('http://localhost:8989/api/books', currentBook)
+        ElMessage.success('新增成功')
+      }
+      dialogVisible.value = false
+      fetchBooks()
+    } catch (err) {
+      ElMessage.error('保存失败')
+    }
+  })
 }
-
   
   // 获取图书列表
-  const fetchBooks = async () => {
+   const fetchBooks = async () => {
   try {
     const res = await axios.get('http://localhost:8989/api/books', {
       params: {
@@ -391,7 +415,6 @@
     ElMessage.error('获取图书失败，请检查网络或后端接口')
   }
 }
-  
   
   // 组件挂载时获取数据
   onMounted(() => {

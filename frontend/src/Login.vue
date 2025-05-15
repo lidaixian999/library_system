@@ -81,19 +81,19 @@ const handleLogin = async () => {
     loading.value = true
     await loginFormRef.value.validate()
 
-    const response = await axios.post('http://localhost:8989/api/users/login', {
-      username: loginForm.username,
-      password: loginForm.password
-    })
+    // const response = await axios.post('http://localhost:8989/api/users/login', {
+    //   username: loginForm.username,
+    //   password: loginForm.password
+    // })
 
-    ElMessage.success('登录成功')
-    const user = response.data.user
+    // ElMessage.success('登录成功')
+    // const user = response.data.user
 
     // 保存用户信息（根据你的需要是否存储）
-    localStorage.setItem('userInfo', JSON.stringify(user))
+    // localStorage.setItem('userInfo', JSON.stringify(user))
 
     // 根据用户名判断是否是管理员
-    if (user.username.toLowerCase() === 'admin') {
+    if (loginForm.username.toLowerCase() === 'admin') {
       router.push('/home_controller')
     } else {
       router.push('/home_user')
@@ -104,6 +104,34 @@ const handleLogin = async () => {
     loading.value = false
   }
 }
+// const handleLogin = async () => {
+//   try {
+//     loading.value = true
+//     await loginFormRef.value.validate()
+
+//     const response = await axios.post('http://localhost:8989/api/users/login', {
+//       username: loginForm.username,
+//       password: loginForm.password
+//     })
+
+//     const user = response.data.user
+//     ElMessage.success('登录成功')
+    
+//     // 保存用户信息
+//     localStorage.setItem('userInfo', JSON.stringify(user))
+
+//     // 根据用户角色跳转不同页面
+//     if (user.role === 'admin') {
+//       router.push('/home_controller')
+//     } else {
+//       router.push('/home_user')
+//     }
+//   } catch (error) {
+//     ElMessage.error(error.response?.data?.message || '用户名或密码错误')
+//   } finally {
+//     loading.value = false
+//   }
+// }
 </script>
 
 

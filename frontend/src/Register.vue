@@ -41,7 +41,6 @@
 </template>
 
 <script setup>
-import axios from 'axios'
 import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
@@ -61,7 +60,7 @@ const registerRules = reactive({
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
-        { min: 3, max: 20, message: '密码长度在3到20个字符', trigger: 'blur' }
+        { min: 6, max: 20, message: '密码长度在6到20个字符', trigger: 'blur' }
     ]
 })
 
@@ -73,21 +72,13 @@ const handleRegister = async () => {
     try {
         loading.value = true
         await registerFormRef.value.validate()
-        
-        // 调用注册API
-        const response = await axios.post('http://localhost:8989/api/users/register', {
-            username: registerForm.username,
-            password: registerForm.password
-        })
-        
-        ElMessage.success('注册成功，请登录')
-        router.push('/login')
+        // 模拟注册API调用
+        setTimeout(() => {
+            ElMessage.success('注册成功，请登录')
+            router.push('/login')
+        }, 1000)
     } catch (error) {
-        if (error.response) {
-            ElMessage.error(error.response.data.message || '注册失败')
-        } else {
-            ElMessage.error('网络错误，请稍后重试')
-        }
+        ElMessage.error('注册失败，请检查输入')
     } finally {
         loading.value = false
     }

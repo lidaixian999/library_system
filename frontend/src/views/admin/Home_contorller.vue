@@ -24,7 +24,7 @@
           <el-dropdown>
             <span class="el-dropdown-link">
               <el-avatar :size="40" :src="userAvatarref" />
-              <span class="username">用户</span>
+              <span class="username">管理员</span>
             </span>
             <template #dropdown>
               <el-dropdown-menu>
@@ -107,7 +107,7 @@
           </div>
         </div>
         <div class="copyright">
-          <p>© 2025 王禹涵 版权所有</p>
+          <p>© 2025 216 版权所有</p>
         </div>
       </footer>
     </div>
@@ -136,15 +136,14 @@
   import banner2 from '@/assets/photo/banner2.jpg'
   import banner3 from '@/assets/photo/banner3.jpg'
   import banner4 from '@/assets/photo/banner4.jpg'
+  import { useNavigation } from '@/utils/Select'
   const router = useRouter()
   // 暴露图片给模板使用
   const logoUrlref = ref(logoUrl)
   const userAvatarref = ref(userAvatar)
   // 导航菜单
   const activeIndex = ref('1')
-  const handleSelect = (key) => {
-    console.log('选中菜单:', key)
-  }
+  const { handleSelect } = useNavigation()
   const getBannerImage = (index) => {
   return banners.value[index].image
 }
@@ -158,7 +157,7 @@
   
   // 快速入口
   const quickAccess = ref([
-    { title: '图书查询', desc: '查询馆藏图书信息', icon: Reading, path: '/library' },
+    { title: '图书查询与管理', desc: '查询馆藏图书信息，管理图书借阅', icon: Reading, path: '/library_controller' },
     { title: '图书借阅', desc: '借阅馆藏可借图书', icon: Notebook, path: '/borrow' },
     { title: '学习资源', desc: '访问学习所需资料', icon: School, path: '/resources' },
     { title: '校历查询', desc: '查看学校校历安排', icon: Calendar, path: '/calendar' },
