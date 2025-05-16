@@ -5,12 +5,18 @@ export const useNavigation = () => {
 
     const handleSelect = (key) => {
         switch (key) {
-            case '1': return router.push('/home_user')
-            case '2': return router.push('/library_user')
-            case '3': return router.push('/resources_user')
-            case '4': return router.push('/campus_life')
-            case '5': return router.push('/about')
-            default: return router.push('/home_user')
+            case 'home_user': return router.push('/home_user')
+            case 'library_user': return router.push('/library_user')
+            case 'resources_user': return router.push('/resources_user')
+            case 'campus_life': return router.push('/campus_life')
+            case 'about_me': return router.push('/about_me')
+
+            case 'home_controller': return router.push('/home_controller')
+            case 'library_controller': return router.push('/library_controller')
+            case 'borrow_admin': return router.push('/borrow_admin')
+            case 'resources_admin': return router.push('/resources_admin')
+            
+            default: return router.push('/login')
         }
     }
 

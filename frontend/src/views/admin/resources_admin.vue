@@ -1,40 +1,36 @@
 <template>
     <div class="learning-resources-container">
-    <!-- 顶部导航栏 -->
-    <header class="header">
-      <div class="logo">
-        <img src="@/assets/photo/sztu-logo.jpg" alt="深技大logo">
-        <span>深圳技术大学</span>
-      </div>
-      <nav class="nav">
-        <el-menu
-          mode="horizontal"
-          :default-active="activeIndex"
-          @select="handleSelect"
-        >
-          <el-menu-item index="/home_user">首页</el-menu-item>
-          <el-menu-item index="/library_user">图书馆</el-menu-item>
-          <el-menu-item index="/resources_user">教学资源</el-menu-item>
-          <el-menu-item index="/campus_life">校园生活</el-menu-item>
-          <el-menu-item index="/about_me">关于我们</el-menu-item>
-        </el-menu>
-      </nav>
-      <div class="user-info">
-        <el-dropdown>
-          <span class="el-dropdown-link">
-            <el-avatar :size="40" :src="userAvatarref" />
-            <span class="username">用户</span>
-          </span>
-          <template #dropdown>
-            <el-dropdown-menu>
-              <el-dropdown-item @click="goToProfile">个人中心</el-dropdown-item>
-              <el-dropdown-item>系统设置</el-dropdown-item>
-              <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
-            </el-dropdown-menu>
-          </template>
-        </el-dropdown>
-      </div>
-    </header>
+      <!-- 顶部导航栏 -->
+      <header class="header">
+        <div class="logo">
+          <img src="@/assets/photo/sztu-logo.jpg" alt="深技大logo">
+          <span>深圳技术大学</span>
+        </div>
+        <nav class="nav">
+          <el-menu mode="horizontal" :default-active="activeIndex" @select="handleSelect">
+            <el-menu-item index="/home_controller">首页</el-menu-item>
+            <el-menu-item index="/library_controller">图书馆</el-menu-item>
+            <el-menu-item index="/resources_admin">教学资源</el-menu-item>
+            <el-menu-item index="/campus_life_admin">校园生活</el-menu-item>
+            <el-menu-item index="/about_me_admin">关于我们</el-menu-item>
+          </el-menu>
+        </nav>
+        <div class="user-info">
+          <el-dropdown>
+            <span class="el-dropdown-link">
+              <el-avatar :size="40" :src="userAvatar" />
+              <span class="username">管理员</span>
+            </span>
+            <template #dropdown>
+              <el-dropdown-menu>
+                <el-dropdown-item @click="goToadminPeople">个人中心</el-dropdown-item>
+                <el-dropdown-item>系统设置</el-dropdown-item>
+                <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
+              </el-dropdown-menu>
+            </template>
+          </el-dropdown>
+        </div>
+      </header>
   
       <!-- 主要内容区 -->
       <main class="main-content">
@@ -141,20 +137,21 @@
   
   <script setup>
   import { ref, computed, onMounted } from 'vue'
-  import { useRouter, useRoute } from 'vue-router'
+  import { useRouter,useRoute } from 'vue-router'
   import { Search, User, Clock } from '@element-plus/icons-vue'
+  
 
   const router = useRouter()
   const route = useRoute()
+
   // 用户信息
   const userAvatar = ref('@/assets/photo/user.png')
-  
+
   // 导航菜单
   const activeIndex = computed(() => {
-  return route.path // 直接返回当前路由路径
+  return route.path
 })
   const handleSelect = (index) => {
-    activeIndex.value = index
     router.push(index)
   }
   
@@ -176,7 +173,9 @@
   const handleCategoryChange = (tab) => {
     console.log('切换分类:', tab)
   }
-  
+  const goToadminPeople = () => {
+    router.push('/ownpeople')
+  }
   // 排序选项
   const sortOptions = ref([
     { value: 'default', label: '默认排序' },
@@ -329,15 +328,8 @@
   const logout = () => {
     router.push('/login')
   }
-  // 用户头像
-const userAvatarref = ref(userAvatar)
-// 个人中心
-const goToProfile = () => {
-  router.push('/ownpeople')
-}
-
   </script>
-
+  
   <style scoped>
   .learning-resources-container {
     width: 100vw;
@@ -357,7 +349,6 @@ const goToProfile = () => {
     background-color: #fff;
     box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
     z-index: 100;
-    flex: 0 0 auto; /* 固定高度 */
   }
   
   .logo {

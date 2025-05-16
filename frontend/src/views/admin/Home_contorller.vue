@@ -13,11 +13,11 @@
             :default-active="activeIndex"
             @select="handleSelect"
           >
-            <el-menu-item index="1">首页</el-menu-item>
-            <el-menu-item index="2">图书馆</el-menu-item>
-            <el-menu-item index="3">教学资源</el-menu-item>
-            <el-menu-item index="4">校园生活</el-menu-item>
-            <el-menu-item index="5">关于我们</el-menu-item>
+            <el-menu-item index="/home_controller">首页</el-menu-item>
+            <el-menu-item index="/library_controller">图书馆</el-menu-item>
+            <el-menu-item index="/resources_admin">教学资源</el-menu-item>
+            <el-menu-item index="/campus_life_admin">校园生活</el-menu-item>
+            <el-menu-item index="/about_me_admin">关于我们</el-menu-item>
           </el-menu>
         </nav>
         <div class="user-info">
@@ -28,7 +28,7 @@
             </span>
             <template #dropdown>
               <el-dropdown-menu>
-                <el-dropdown-item>个人中心</el-dropdown-item>
+                <el-dropdown-item @click="goToadminPeople">个人中心</el-dropdown-item>
                 <el-dropdown-item>系统设置</el-dropdown-item>
                 <el-dropdown-item divided @click="logout">退出登录</el-dropdown-item>
               </el-dropdown-menu>
@@ -114,8 +114,8 @@
   </template>
   
   <script setup>
-  import { ref } from 'vue'
-  import { useRouter } from 'vue-router'
+  import { ref,computed } from 'vue'
+  import { useRouter ,useRoute} from 'vue-router'
   import {
     User,
     Lock,
@@ -136,14 +136,18 @@
   import banner2 from '@/assets/photo/banner2.jpg'
   import banner3 from '@/assets/photo/banner3.jpg'
   import banner4 from '@/assets/photo/banner4.jpg'
-  import { useNavigation } from '@/utils/Select'
   const router = useRouter()
+  const route = useRoute()
   // 暴露图片给模板使用
   const logoUrlref = ref(logoUrl)
   const userAvatarref = ref(userAvatar)
   // 导航菜单
-  const activeIndex = ref('1')
-  const { handleSelect } = useNavigation()
+  const activeIndex = computed(() => {
+  return route.path
+})
+  const handleSelect = (index) => {
+    router.push(index)
+  }
   const getBannerImage = (index) => {
   return banners.value[index].image
 }
@@ -154,12 +158,14 @@
   { id: 3, title: '校园风光3', image: banner3 },
   { id: 4, title: '校园风光4', image: banner4 }
 ])
-  
+const goToadminPeople = () => {
+    router.push('/ownpeople')
+  }
   // 快速入口
   const quickAccess = ref([
     { title: '图书查询与管理', desc: '查询馆藏图书信息，管理图书借阅', icon: Reading, path: '/library_controller' },
-    { title: '图书借阅', desc: '借阅馆藏可借图书', icon: Notebook, path: '/borrow' },
-    { title: '学习资源', desc: '访问学习所需资料', icon: School, path: '/resources' },
+    { title: '图书借阅管理', desc: '管理借阅馆藏可借图书', icon: Notebook, path: '/borrow_admin' },
+    { title: '学习资源', desc: '访问学习所需资料', icon: School, path: '/resources_admin' },
     { title: '校历查询', desc: '查看学校校历安排', icon: Calendar, path: '/calendar' },
     { title: '文件下载', desc: '下载各类表格文件', icon: Document, path: '/download' },
     { title: '系统公告', desc: '查看系统公告信息', icon: Bell, path: '/notice' }

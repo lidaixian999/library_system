@@ -13,11 +13,11 @@
             :default-active="activeIndex"
             @select="handleSelect"
           >
-            <el-menu-item index="1">首页</el-menu-item>
-            <el-menu-item index="2">图书馆</el-menu-item>
-            <el-menu-item index="3">教学资源</el-menu-item>
-            <el-menu-item index="4">校园生活</el-menu-item>
-            <el-menu-item index="5">关于我们</el-menu-item>
+            <el-menu-item index="/home_user">首页</el-menu-item>
+            <el-menu-item index="/library_user">图书馆</el-menu-item>
+            <el-menu-item index="/resources_user">教学资源</el-menu-item>
+            <el-menu-item index="/campus_life">校园生活</el-menu-item>
+            <el-menu-item index="/about_me">关于我们</el-menu-item>
           </el-menu>
         </nav>
         <div class="user-info">
@@ -136,6 +136,7 @@
   import banner2 from '@/assets/photo/banner2.jpg'
   import banner3 from '@/assets/photo/banner3.jpg'
   import banner4 from '@/assets/photo/banner4.jpg'
+  
   const router = useRouter()
   const route = useRoute()
   // 暴露图片给模板使用
@@ -143,39 +144,15 @@
   const userAvatarref = ref(userAvatar)
   // 导航菜单
   const activeIndex = computed(() => {
-  switch (route.path) {
-    case '/home_user': return '1'
-    case '/library_user': return '2'
-    case '/resources_user': return '3'
-    case '/campus_life': return '4'
-    case '/about': return '5'
-    default: return '1'
-  }
+  return route.path
 })
+const handleSelect = (index) => {
+  router.push(index)
+}
 const goToProfile = () => {
-  router.push('/user_people') // 个人中心
+  router.push('/ownpeople') // 个人中心
 }
-const handleSelect = (key) => {
-  switch (key) {
-    case '1':
-      router.push('/home_user') // 首页
-      break
-    case '2':
-      router.push('/library_user') // 图书馆
-      break
-    case '3':
-      router.push('/resources_user') // 教学资源
-      break
-    case '4':
-      router.push('/campus_life') // 校园生活
-      break
-    case '5':
-      router.push('/about') // 关于我们
-      break
-    default:
-      break
-  }
-}
+
   const getBannerImage = (index) => {
   return banners.value[index].image
 }

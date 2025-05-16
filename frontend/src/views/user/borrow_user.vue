@@ -12,11 +12,11 @@
             :default-active="activeIndex"
             @select="handleSelect"
           >
-            <el-menu-item index="1">首页</el-menu-item>
-            <el-menu-item index="2">图书馆</el-menu-item>
-            <el-menu-item index="3">教学资源</el-menu-item>
-            <el-menu-item index="4">校园生活</el-menu-item>
-            <el-menu-item index="5">关于我们</el-menu-item>
+            <el-menu-item index="/home_user">首页</el-menu-item>
+            <el-menu-item index="/library_user">图书馆</el-menu-item>
+            <el-menu-item index="/resources_user">教学资源</el-menu-item>
+            <el-menu-item index="/campus_life">校园生活</el-menu-item>
+            <el-menu-item index="/about_me">关于我们</el-menu-item>
           </el-menu>
         </nav>
         <div class="user-info">
@@ -39,7 +39,7 @@
       <!-- 主要内容区 -->
       <main class="main-content">
         <div class="page-header">
-          <h1>我的借阅</h1>
+          <h1 class="my-borrow-title">我的借阅</h1>
           <el-button type="primary" @click="goBack">返回首页</el-button>
         </div>
   
@@ -52,7 +52,7 @@
               <el-table-column prop="dueDate" label="应还日期" width="150" />
               <el-table-column prop="status" label="状态" width="100">
                 <template #default="scope">
-                  <el-tag :type="scope.row.status === '正常' ? 'success' : 'danger'">
+                  <el-tag :type="scope.row.status === 'borrowed' ? 'success' : 'danger'">
                     {{ scope.row.status }}
                   </el-tag>
                 </template>
@@ -107,85 +107,103 @@
         </div>
       </footer>
     </div>
+    <!-- 添加借阅时间选择对话框 -->
+  <el-dialog
+    v-model="borrowDialogVisible"
+    title="选择借阅时间"
+    width="30%"
+  >
+    <el-form :model="borrowForm" label-width="100px">
+      <el-form-item label="借阅时间">
+        <el-select v-model="borrowForm.duration" placeholder="请选择借阅时间">
+          <el-option :value="30" label="1个月" />
+          <el-option :value="90" label="3个月" />
+          <el-option :value="180" label="6个月" />
+          <el-option :value="365" label="1年" />
+        </el-select>
+      </el-form-item>
+    </el-form>
+    <template #footer>
+      <span class="dialog-footer">
+        <el-button @click="borrowDialogVisible = false">取消</el-button>
+        <el-button type="primary" @click="confirmBorrow">确认借阅</el-button>
+      </span>
+    </template>
+  </el-dialog>
   </template>
   
   <script setup>
-  import { ref } from 'vue'
+  import { ref, onMounted } from 'vue'
   import { useRouter } from 'vue-router'
+  import { ElMessage } from 'element-plus'
+  import axios from 'axios'
   import userAvatar from '@/assets/photo/user.png'
   
   const router = useRouter()
-  
-  // 导航菜单
-  const activeIndex = ref('2')
-  const handleSelect = (key) => {
-    console.log('选中菜单:', key)
+  const handleSelect = (index) => {
+    router.push(index)
   }
-  
-  // 用户头像
+  // 退出登录
+  const logout = () => {
+    router.push('/login')
+  }
+  // 导航菜单
+  const activeIndex = ref('')
   const userAvatarref = ref(userAvatar)
   
   // 借阅数据
   const activeTab = ref('current')
-  const currentBorrows = ref([
-    {
-      bookName: 'Vue.js设计与实现',
-      bookId: 'TP312V/123',
-      borrowDate: '2023-10-15',
-      dueDate: '2023-11-15',
-      status: '正常'
-    },
-    {
-      bookName: 'JavaScript高级程序设计',
-      bookId: 'TP312JS/456',
-      borrowDate: '2023-10-10',
-      dueDate: '2023-11-10',
-      status: '即将到期'
-    },
-    {
-      bookName: '深入浅出Node.js',
-      bookId: 'TP312N/789',
-      borrowDate: '2023-09-20',
-      dueDate: '2023-10-20',
-      status: '已逾期'
-    }
-  ])
-  
-  const borrowHistory = ref([
-    {
-      bookName: 'CSS权威指南',
-      bookId: 'TP312C/101',
-      borrowDate: '2023-08-01',
-      returnDate: '2023-08-30',
-      status: '已归还'
-    },
-    {
-      bookName: 'HTML5权威指南',
-      bookId: 'TP312H/202',
-      borrowDate: '2023-07-15',
-      returnDate: '2023-08-15',
-      status: '已归还'
-    }
-  ])
-  
-  // 操作方法
-  const handleRenew = (row) => {
-    ElMessage.success(`已续借图书: ${row.bookName}`)
-    // 实际应用中这里应该调用续借API
-  }
-  
-  const handleReturn = (row) => {
-    ElMessage.success(`已归还图书: ${row.bookName}`)
-    // 实际应用中这里应该调用归还API
-  }
-  
+  const currentBorrows = ref([])
+  const borrowHistory = ref([])
   const goBack = () => {
-    router.push('/Home_user')
+    router.push('/home_user')
+  }
+  // 获取借阅数据
+  const fetchBorrowData = async () => {
+    try {
+      const userInfo = JSON.parse(localStorage.getItem('userInfo') || '{}')
+      const res = await axios.get('http://localhost:8989/api/borrow/list', {
+        params: { username: userInfo.username }
+      })
+      currentBorrows.value = res.data.current
+      borrowHistory.value = res.data.history
+    } catch (error) {
+      console.error('获取借阅记录失败:', error)
+      ElMessage.error('获取借阅记录失败')
+    }
   }
   
-  const logout = () => {
-    router.push('/login')
+  // 续借方法
+  const handleRenew = async (row) => {
+    try {
+      await axios.post('http://localhost:8989/api/borrow/renew', {
+        recordId: row.recordId
+      })
+      ElMessage.success('续借成功')
+      fetchBorrowData() // 刷新数据
+    } catch (error) {
+      ElMessage.error(error.response?.data?.error || '续借失败')
+    }
   }
+  
+  // 归还方法
+  const handleReturn = async (row) => {
+    try {
+      await axios.post('http://localhost:8989/api/borrow/return', {
+        record_id: row.recordId
+      })
+      ElMessage.success('归还成功')
+      fetchBorrowData() // 刷新数据
+    } catch (error) {
+      ElMessage.error('归还失败')
+    }
+  }
+  
+  // 组件挂载时获取数据
+  onMounted(() => {
+    fetchBorrowData()
+  })
+
   </script>
   
   <style scoped>
@@ -210,7 +228,9 @@
     z-index: 100;
     flex: 0 0 auto;
   }
-  
+  .my-borrow-title {
+  color: #100404d5; /* 你想要的颜色，可以换成其他色值 */
+}
   .logo {
     display: flex;
     align-items: center;
@@ -253,6 +273,7 @@
     justify-content: space-between;
     align-items: center;
     margin-bottom: 20px;
+    color: #150505d5;
   }
   
   .borrow-tabs {

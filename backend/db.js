@@ -4,8 +4,8 @@ const mysql = require('mysql2');
 const pool = mysql.createPool({
   host: 'localhost',
   user: 'root',
-  password: '@Lmj20041114',
-  database: 'library_system',
+  password: 'root',
+  database: 'sztu_library',
 });
 
 // 使用 promise API

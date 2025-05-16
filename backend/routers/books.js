@@ -3,23 +3,134 @@ const router = express.Router();
 const db = require('../db');
 
 router.get('/ai/analysis', async (req, res) => {
-  const { bookId } = req.query;
-  // 模拟 AI 分析结果
-  res.json({
-    readingTime: '约3小时',
-    evaluation: '内容丰富，结构清晰',
-    suitableFor: '中学生及以上'
-  });
+  const { book_id } = req.query; // ✅ 改为 query 获取参数
+  console.log('AI请求参数：', book_id);
+  if (!book_id) {
+    return res.status(400).json({ error: '缺少 book_id 参数' });
+  }
+
+  try {
+    // 查询数据库获取书名
+    const [rows] = await db.query('SELECT title FROM book WHERE id = ?', [book_id]);
+
+    if (rows.length === 0) {
+      return res.status(404).json({ error: '未找到对应的图书' });
+    }
+
+    const bookTitle = rows[0].title;
+    console.log('AI请求参数：', bookTitle);
+    // AI 请求配置
+    const options = {
+      hostname: 'spark-api-open.xf-yun.com',
+      path: '/v1/chat/completions',
+      method: 'POST',
+      headers: {
+        'Authorization': 'Bearer tpOXPjHTkYPWoAZjNXNO:HCHqHABuYdDnERVuayqf',
+        'Content-Type': 'application/json'
+      }
+    };
+
+    const requestData = JSON.stringify({
+      "max_tokens": 500,
+      "top_k": 2,
+      "temperature": 0.4,
+      "messages": [
+        {
+          "role": "user",
+          "content": `请根据以下图书的标题，生成一段分析内容，包含以下三项信息：
+                  1. 阅读时间（大概需要多久读完这本书）
+                  2. 图书评价（简要说明该书的优点和特色）
+                  3. 适合人群（推荐这本书适合哪些读者阅读）
+
+                  图书标题：${bookTitle}
+
+                  请用简洁清晰的语句回答，并按照如下 JSON 格式返回：
+
+                  {
+                    "readingTime": "（示例：约3小时）",
+                    "evaluation": "（示例：语言优美，情节紧凑）",
+                    "suitableFor": "（示例：适合高中生和文学爱好者）"
+                  }`
+        }
+      ],
+      "model": "lite",
+      "stream": false 
+    });
+
+    let responseData = '';
+    const decoder = new StringDecoder('utf8');
+
+    // 创建 HTTPS 请求（注意这里将变量名改为 apiReq 避免冲突）
+    const apiReq = https.request(options, (apiRes) => {
+      apiRes.on('data', (chunk) => {
+        responseData += decoder.write(chunk);
+      });
+
+      apiRes.on('end', () => {
+        try {
+          const parsedData = JSON.parse(responseData);
+          
+          // 假设 AI 返回的数据结构包含所需信息
+          const aiResponse = parsedData.choices[0].message.content;
+          
+          // 解析 AI 返回的 JSON 内容
+          const analysis = JSON.parse(aiResponse);
+          
+          res.json({
+            bookTitle,
+            ...analysis
+          });
+        } catch (error) {
+          console.error('解析 AI 响应失败:', error);
+          res.status(500).json({ error: '解析 AI 响应失败' });
+        }
+      });
+    });
+
+    apiReq.on('error', (error) => {
+      console.error('AI 请求出错:', error);
+      res.status(500).json({ error: 'AI 请求失败' });
+    });
+
+    // 发送请求数据（注意这里的位置正确）
+    apiReq.write(requestData);
+    apiReq.end();
+    return res.json({
+        bookTitle,
+        ...analysis
+      }); // ✅ return 加上
+  } catch (err) {
+    console.error('数据库查询出错:', err);
+    res.status(500).json({ error: '服务器内部错误' });
+  }
+
 });
+
+
+// router.get('/ai/analysis', async (req, res) => {
+//   const { bookId } = req.query;
+//   // 模拟 AI 分析结果
+//   res.json({
+//     readingTime: '约3小时',
+//     evaluation: '内容丰富，结构清晰',
+//     suitableFor: '中学生及以上'
+//   });
+// });
+
 
 // controllers/books.js
 router.get('/', async (req, res) => {
-  const { title, author, isbn, category, page = 1, pageSize = 10 } = req.query
+  const { keyword, title, author, isbn, category, page = 1, pageSize = 10 } = req.query
   const offset = (page - 1) * pageSize
 
   let sql = 'SELECT * FROM books WHERE 1=1'
   const params = []
 
+  // 新增：支持 keyword 模糊搜索
+  if (keyword) {
+    sql += ' AND (title LIKE ? OR author LIKE ? OR isbn LIKE ?)'
+    params.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`)
+  }
   if (title) {
     sql += ' AND title LIKE ?'
     params.push(`%${title}%`)
@@ -42,7 +153,30 @@ router.get('/', async (req, res) => {
 
   const [rows] = await db.query(sql, params)
 
-  const [[{ total }]] = await db.query('SELECT COUNT(*) AS total FROM books WHERE 1=1', []) // 可以带相同条件优化
+  // 统计总数时也要加上相同的条件
+  let countSql = 'SELECT COUNT(*) AS total FROM books WHERE 1=1'
+  let countParams = []
+  if (keyword) {
+    countSql += ' AND (title LIKE ? OR author LIKE ? OR isbn LIKE ?)'
+    countParams.push(`%${keyword}%`, `%${keyword}%`, `%${keyword}%`)
+  }
+  if (title) {
+    countSql += ' AND title LIKE ?'
+    countParams.push(`%${title}%`)
+  }
+  if (author) {
+    countSql += ' AND author LIKE ?'
+    countParams.push(`%${author}%`)
+  }
+  if (isbn) {
+    countSql += ' AND isbn LIKE ?'
+    countParams.push(`%${isbn}%`)
+  }
+  if (category) {
+    countSql += ' AND category = ?'
+    countParams.push(category)
+  }
+  const [[{ total }]] = await db.query(countSql, countParams)
 
   res.json({ books: rows, total })
 })
