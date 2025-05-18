@@ -281,6 +281,7 @@ import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import userAvatar from '@/assets/photo/user.png'
+import { format } from 'date-fns'
 
 
 const router = useRouter()
@@ -444,7 +445,7 @@ watch(() => renewForm.value.duration, (newDuration) => {
 // 确认续借
 const confirmRenew = async () => {
   try {
-    await axios.post('http://localhost:8989/api/admin/borrow/renew', {
+    await axios.post('http://localhost:8989/api/borrow/renew', {
       recordId: renewForm.value.recordId,
       duration: renewForm.value.duration
     })
@@ -468,8 +469,7 @@ const handleAdminReturn = async (record) => {
         type: 'warning'
       }
     )
-    
-    await axios.post('http://localhost:8989/api/admin/borrow/return', {
+    await axios.post('http://localhost:8989/api/borrow/return', {
       recordId: record.recordId
     })
     ElMessage.success('归还成功')
