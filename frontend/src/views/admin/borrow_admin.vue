@@ -315,11 +315,12 @@ const renewForm = ref({
   newDueDate: ''
 })
 
+
 // 获取所有借阅记录
 const fetchAllBorrowRecords = async () => {
   try {
     loading.value = true
-    const response = await axios.get('http://localhost:8989/api/admin/borrow/all', {
+    const response = await axios.get('http://localhost:8989/api/borrow/all', {
       params: {
         page: currentPage.value,
         size: pageSize.value,

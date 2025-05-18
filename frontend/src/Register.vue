@@ -25,6 +25,18 @@
                         </template>
                     </el-input>
                 </el-form-item>
+                <el-form-item label="邮箱（可选）" prop="email">
+                  <el-input
+                    v-model="registerForm.email"
+                    placeholder="请输入邮箱（可选）"
+                    size="large">
+                    <template #prefix>
+                      <el-icon>
+                        <Message />
+                      </el-icon>
+                    </template>
+                  </el-input>
+                </el-form-item>
                 <el-form-item>
                     <el-button type="primary" size="large" class="register-btn" :loading="loading" @click="handleRegister">
                         注册
@@ -45,13 +57,18 @@ import { ref, reactive } from 'vue'
 import { useRouter } from 'vue-router'
 import { ElMessage } from 'element-plus'
 import { User, Lock } from '@element-plus/icons-vue'
+import axios from 'axios'
+
+
+
 
 const router = useRouter()
 const loading = ref(false)
 const registerFormRef = ref(null)
 const registerForm = reactive({
     username: '',
-    password: ''
+    password: '',
+    email: ''
 })
 const registerRules = reactive({
     username: [
@@ -60,7 +77,7 @@ const registerRules = reactive({
     ],
     password: [
         { required: true, message: '请输入密码', trigger: 'blur' },
-        { min: 6, max: 20, message: '密码长度在6到20个字符', trigger: 'blur' }
+        { min: 3, max: 20, message: '密码长度在3到20个字符', trigger: 'blur' }
     ]
 })
 
@@ -69,19 +86,28 @@ const goLogin = () => {
 }
 
 const handleRegister = async () => {
-    try {
-        loading.value = true
-        await registerFormRef.value.validate()
-        // 模拟注册API调用
-        setTimeout(() => {
-            ElMessage.success('注册成功，请登录')
-            router.push('/login')
-        }, 1000)
-    } catch (error) {
-        ElMessage.error('注册失败，请检查输入')
-    } finally {
-        loading.value = false
+  try {
+    loading.value = true
+    await registerFormRef.value.validate()
+
+    // 调用后端注册 API
+    await axios.post('http://localhost:8989/api/users/register', {
+    username: registerForm.username,
+    password: registerForm.password,
+    email: registerForm.email || null // 邮箱可为空
+    })
+
+    ElMessage.success('注册成功，请登录')
+    router.push('/home_user')
+  } catch (error) {
+    if (error.response && error.response.data && error.response.data.error) {
+      ElMessage.error(error.response.data.error)
+    } else {
+      ElMessage.error('注册失败，请检查输入')
     }
+  } finally {
+    loading.value = false
+  }
 }
 </script>
 

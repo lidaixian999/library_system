@@ -73,6 +73,54 @@ router.post('/borrow', async (req, res) => {
   }
 });
 
+router.get('/all', async (req, res) => {
+  const { page = 1, size = 10, search = '' } = req.query
+  const offset = (page - 1) * size
+  const limit = parseInt(size)
+  const keyword = `%${search}%`
+  console.log('keyword:', keyword)
+  try {
+    // 总记录数（模糊搜索 user.name 或 book.title）
+    const [totalResult] = await db.query(`
+      SELECT COUNT(*) AS total
+      FROM borrow br
+      LEFT JOIN users u ON br.user_id = u.id
+      LEFT JOIN books b ON br.book_id = b.id
+      WHERE u.username LIKE ? OR b.title LIKE ?
+    `, [keyword, keyword])
+    const total = totalResult[0].total
+
+    // 借阅记录（分页）
+    const [records] = await db.query(`
+      SELECT br.*, u.username AS userName, b.title AS bookTitle
+      FROM borrow br
+      LEFT JOIN users u ON br.user_id = u.id
+      LEFT JOIN books b ON br.book_id = b.id
+      WHERE u.username LIKE ? OR b.title LIKE ?
+      ORDER BY br.borrow_date DESC
+      LIMIT ? OFFSET ?
+    `, [keyword, keyword, limit, offset])
+
+    // 逾期数（未归还且当前时间 > due_date）
+    const [overdueResult] = await db.query(`
+      SELECT COUNT(*) AS overdue
+      FROM borrow
+      WHERE status = 'borrowed' AND due_date < NOW()
+    `)
+    const overdue = overdueResult[0].overdue
+
+    res.json({
+      records,
+      total,
+      overdue
+    })
+  } catch (err) {
+    console.error('获取借阅记录失败:', err)
+    res.status(500).json({ message: '服务器内部错误' })
+  }
+})
+
+
 // 获取借阅列表
 router.get('/list', async (req, res) => {
   const { username } = req.query;

@@ -5,17 +5,18 @@ const router = express.Router();
 
 // 注册接口
 router.post('/register', async (req, res) => {
-  const { username, password } = req.body;
+  const { username, password ,email } = req.body;
   const [rows] = await db.query('SELECT * FROM users WHERE username = ?', [username]);
   if (rows.length > 0) {
     return res.status(400).json({ error: 'Username already exists' });
   }
 
   const hashedPassword = await bcrypt.hash(password, 10); // 10是加盐强度
-  await db.query('INSERT INTO users (username, password) VALUES (?, ?)', [username, hashedPassword]);
+await db.query('INSERT INTO users (username, password, email) VALUES (?, ?, ?)', [username, hashedPassword, email])
 
   res.json({ message: 'Registered successfully' });
 });
+
 // 修改密码接口
 router.post('/change-password', async (req, res) => {
   const { username, newPassword } = req.body;
@@ -26,6 +27,7 @@ router.post('/change-password', async (req, res) => {
   await db.query('UPDATE users SET password = ? WHERE username = ?', [hashedPassword, username]);
   res.json({ message: '密码修改成功' });
 });
+
 // 登录接口
 router.post('/login', async (req, res) => {
   const { username, password } = req.body;

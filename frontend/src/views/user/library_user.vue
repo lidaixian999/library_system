@@ -243,18 +243,24 @@ import { useRouter, useRoute } from 'vue-router'
 
 const router = useRouter()
 const route = useRoute()
+const aiLoading = ref(false)
 const aiData = ref(null)
 const fetchAIAnalysis = async () => {
+  
 try {
+   console.log(currentBook.id)
   const response = await axios.get('http://localhost:8989/api/books/ai/analysis', {
     params: {
-      bookId: 1 // 替换为当前图书 ID
+      book_id: currentBook.id // 替换为当前图书 ID
     }
   })
+  console.log(response.data)
   aiData.value = response.data
 } catch (error) {
+   aiLoading.value = false
   ElMessage.error('AI分析获取失败')
 }
+
 }
 const activeIndex = computed(() => {
   return route.path
@@ -354,6 +360,7 @@ const handleCurrentChange = (page) => {
 const showBookDetail = (book) => {
   Object.assign(currentBook, book)
   detailDialogVisible.value = true
+    aiData.value = null   // 清空 AI 分析结果
 }
 
 // 借阅图书
