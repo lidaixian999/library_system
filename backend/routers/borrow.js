@@ -6,10 +6,8 @@ const db = require('../db');
 // 借书接口
 router.post('/borrow', async (req, res) => {
   const { user_id, book_id } = req.body;
-
   try {
     await db.query('START TRANSACTION');
-
     // 检查图书状态和库存
     const [bookRows] = await db.query(
       'SELECT * FROM books WHERE id = ? FOR UPDATE',
@@ -74,12 +72,20 @@ router.post('/borrow', async (req, res) => {
 });
 
 router.get('/all', async (req, res) => {
+
   const { page = 1, size = 10, search = '' } = req.query
   const offset = (page - 1) * size
   const limit = parseInt(size)
   const keyword = `%${search}%`
   console.log('keyword:', keyword)
   try {
+
+     await db.query(`
+      UPDATE borrow
+      SET status = 'overdue'
+      WHERE status = 'borrowed' AND due_date < NOW()
+    `);
+
     // 总记录数（模糊搜索 user.name 或 book.title）
     const [totalResult] = await db.query(`
       SELECT COUNT(*) AS total
@@ -92,7 +98,7 @@ router.get('/all', async (req, res) => {
 
     // 借阅记录（分页）
     const [records] = await db.query(`
-      SELECT br.*, u.username AS userName, b.title AS bookTitle
+      SELECT br.id AS recordId, u.username AS username, b.title AS bookName , b.isbn AS bookId,  br.borrow_date AS borrowDate,br.return_date AS returnDate,br.due_date AS dueDate,br.status AS status
       FROM borrow br
       LEFT JOIN users u ON br.user_id = u.id
       LEFT JOIN books b ON br.book_id = b.id
@@ -102,12 +108,16 @@ router.get('/all', async (req, res) => {
     `, [keyword, keyword, limit, offset])
 
     // 逾期数（未归还且当前时间 > due_date）
-    const [overdueResult] = await db.query(`
-      SELECT COUNT(*) AS overdue
-      FROM borrow
-      WHERE status = 'borrowed' AND due_date < NOW()
-    `)
-    const overdue = overdueResult[0].overdue
+      const [overdue] = await db.query(`
+       SELECT br.id AS recordId, u.username AS username, b.title AS bookName , b.isbn AS bookId, br.borrow_date AS borrowDate, br.return_date AS returnDate, br.due_date AS dueDate, 'overdue' AS status
+      FROM borrow br
+      LEFT JOIN users u ON br.user_id = u.id
+      LEFT JOIN books b ON br.book_id = b.id
+      WHERE 
+        br.status = 'overdue' AND 
+        br.due_date < NOW() AND
+        (u.username LIKE "%%" OR b.title LIKE "%%")
+    `, [keyword, keyword]);
 
     res.json({
       records,
@@ -170,7 +180,7 @@ router.get('/list', async (req, res) => {
 
 // 续借接口
 router.post('/renew', async (req, res) => {
-  const { recordId } = req.body;
+  const { recordId , duration} = req.body;
   try {
     const [record] = await db.query('SELECT * FROM borrow WHERE id = ? AND status = "borrowed"', [recordId]);
     if (!record.length) {
@@ -179,9 +189,9 @@ router.post('/renew', async (req, res) => {
 
     await db.query(`
       UPDATE borrow 
-      SET due_date = DATE_ADD(due_date, INTERVAL 14 DAY)
+      SET due_date = DATE_ADD(due_date, INTERVAL ? DAY)
       WHERE id = ?
-    `, [recordId]);
+    `, [duration,recordId]);
 
     res.json({ message: '续借成功' });
   } catch (error) {
@@ -191,12 +201,11 @@ router.post('/renew', async (req, res) => {
 
 // 还书接口
 router.post('/return', async (req, res) => {
-  const { record_id } = req.body;
+  const { recordId } = req.body;
 
   try {
     await db.query('START TRANSACTION');
-
-    const [record] = await db.query('SELECT * FROM borrow WHERE id = ? AND status = "borrowed"', [record_id]);
+    const [record] = await db.query('SELECT * FROM borrow WHERE id = ? AND status = "borrowed"', [recordId]);
     if (!record.length) {
       await db.query('ROLLBACK');
       return res.status(400).json({ error: '借阅记录不存在或已归还' });
@@ -208,7 +217,7 @@ router.post('/return', async (req, res) => {
       SET return_date = NOW(),
           status = 'returned'
       WHERE id = ?
-    `, [record_id]);
+    `, [recordId]);
 
     // 更新图书库存
     await db.query(`
