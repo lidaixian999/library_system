@@ -494,33 +494,3 @@ app.use(cors({
 添加特色AI功能实现AI查询书籍，回复书籍阅读时间，推荐指数，推荐人群。
 
 我认为阅读时间比较有用，所以添加了这个功能。
-
-##  登录界面
-
-![image-20250616112715585](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112715585.png)
-
-## 用户主界面
-
-![image-20250616112742607](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112742607.png)
-
-## 书籍查询界面
-
-![image-20250616112808246](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112808246.png)
-
-![image-20250616112822281](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112822281.png)
-
-## 用户借阅界面
-
-![image-20250616112841482](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112841482.png)
-
-## 管理员主界面
-
-​	![image-20250616112927135](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112927135.png)
-
-## 管理员管理书籍界面
-
-![image-20250616112904825](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112904825.png)
-
-## 管理员管理书籍借阅界面
-
-![image-20250616112939796](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112939796.png)
