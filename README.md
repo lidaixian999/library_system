@@ -478,14 +478,49 @@ app.use(cors({
 
 本项目采用 MIT 许可证 - 查看 [LICENSE](LICENSE) 文件了解详情。
 
-## 📞 联系方式
+## 图书管理系统技术文档
 
-- 项目维护者：[您的姓名]
-- 邮箱：[您的邮箱]
-- 项目地址：[GitHub仓库地址]
+演示视频图书管理系统.mp4
+链接: https://pan.baidu.com/s/1gVsSftBG0hpznk9BfQ4JmA?pwd=nx3k
 
----
+前端部署好的链接（需要开梯子访问） 
 
-**注意：** 本项目以学习前后端开发为主要目的，持续更新中，如有缺陷多多包涵。
+[library-system – Deployment Overview – Vercel ](https://vercel.com/lidaixian999s-projects/library-system/Lrh8e2iL7hBGdmD7UL4TU5bjmL66)
 
-*最后更新时间：2024年12月*
+ 后端采用EXpress 和MySQL数据库管理。
+
+实现了页面登录，用户书籍借阅，查询，管理员书籍管理，增删改查。
+
+添加特色AI功能实现AI查询书籍，回复书籍阅读时间，推荐指数，推荐人群。
+
+我认为阅读时间比较有用，所以添加了这个功能。
+
+##  登录界面
+
+![image-20250616112715585](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112715585.png)
+
+## 用户主界面
+
+![image-20250616112742607](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112742607.png)
+
+## 书籍查询界面
+
+![image-20250616112808246](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112808246.png)
+
+![image-20250616112822281](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112822281.png)
+
+## 用户借阅界面
+
+![image-20250616112841482](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112841482.png)
+
+## 管理员主界面
+
+​	![image-20250616112927135](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112927135.png)
+
+## 管理员管理书籍界面
+
+![image-20250616112904825](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112904825.png)
+
+## 管理员管理书籍借阅界面
+
+![image-20250616112939796](C:\Users\97049\AppData\Roaming\Typora\typora-user-images\image-20250616112939796.png)
