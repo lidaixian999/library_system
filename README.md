@@ -1,2 +1,3 @@
 # 本项目以VUE3为前端,用Epress作为后端，用mysql作为数据库
 项目以学习前后端为主要目的，持续更新中，如有缺陷多多包涵
+演示视频链接: https://pan.baidu.com/s/1rUErffOPO-buuHnFtDMG5g?pwd=af6e 
