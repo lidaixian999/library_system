@@ -1,4 +1,6 @@
 # 图书管理系统技术文档
+演示视频图书管理系统.mp4
+链接: https://pan.baidu.com/s/1gVsSftBG0hpznk9BfQ4JmA?pwd=nx3k
 
 ## 📋 项目概述
 
