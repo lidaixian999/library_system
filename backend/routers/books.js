@@ -112,7 +112,7 @@ const { StringDecoder } = require('string_decoder');
 // });
 
 
-router.get('/ai/analysis', async (req, res) => {
+router.get('/ai/analysis', async (req, res) => {//搜索图书
   const { book_id } = req.query;
   if (!book_id) {
     return res.status(400).json({ error: '缺少 book_id 参数' });
@@ -339,7 +339,69 @@ router.delete('/:id', async (req, res) => {
     res.status(500).json({ error: '删除图书失败' });
   }
 });
+// 更新一本图书
+router.put('/:id', async (req, res) => {
+  const { id } = req.params;
+  const {
+    isbn,
+    title,
+    author,
+    category,
+    totalCopies,
+    availableCopies,
+    location,
+    cover,
+    description
+  } = req.body;
 
+  // 验证必选字段
+  if (!isbn || !title || !author || !category || !totalCopies || !availableCopies) {
+    return res.status(400).json({ error: '缺少必选字段' });
+  }
+
+  // 确保可借数量不超过总数量
+  if (availableCopies > totalCopies) {
+    return res.status(400).json({ error: '可借数量不能超过总数量' });
+  }
+
+  const sql = `
+    UPDATE books SET 
+      isbn = ?, 
+      title = ?, 
+      author = ?, 
+      category = ?, 
+      totalCopies = ?, 
+      availableCopies = ?, 
+      location = ?, 
+      cover = ?, 
+      description = ?
+    WHERE id = ?;
+  `;
+
+  const params = [
+    isbn,
+    title,
+    author,
+    category,
+    totalCopies,
+    availableCopies,
+    location,
+    cover,
+    description,
+    id
+  ];
+
+  try {
+    const [result] = await db.query(sql, params);
+    if (result.affectedRows === 0) {
+      return res.status(404).json({ error: '未找到该图书' });
+    }
+    res.json({ message: '更新成功' });
+  } catch (err) {
+    console.error('更新图书失败:', err);
+    res.status(500).json({ error: '更新图书失败' });
+  }
+});
 // 批量删除图书
 router.delete('/', async (req, res) => {
   const { ids } = req.body;

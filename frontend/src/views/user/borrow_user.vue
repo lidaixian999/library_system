@@ -177,7 +177,12 @@
   const handleRenew = async (row) => {
     try {
       await axios.post('http://localhost:8989/api/borrow/renew', {
+<<<<<<< HEAD
+        recordId: row.recordId,
+        duration: 30 // 添加默认续借天数
+=======
         recordId: row.recordId
+>>>>>>> 504b7d7e211b17c1d1900521d8f597b2fb0c6ef6
       })
       ElMessage.success('续借成功')
       fetchBorrowData() // 刷新数据
@@ -190,7 +195,11 @@
   const handleReturn = async (row) => {
     try {
       await axios.post('http://localhost:8989/api/borrow/return', {
+<<<<<<< HEAD
+        recordId: row.recordId
+=======
         record_id: row.recordId
+>>>>>>> 504b7d7e211b17c1d1900521d8f597b2fb0c6ef6
       })
       ElMessage.success('归还成功')
       fetchBorrowData() // 刷新数据
