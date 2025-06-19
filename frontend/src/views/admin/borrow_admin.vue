@@ -7,11 +7,7 @@
         <span>深圳技术大学</span>
       </div>
       <nav class="nav">
-        <el-menu
-          mode="horizontal"
-          :default-active="activeIndex"
-          @select="handleSelect"
-        >
+        <el-menu mode="horizontal" :default-active="activeIndex" @select="handleSelect">
           <el-menu-item index="/home_controller">首页</el-menu-item>
           <el-menu-item index="/library_controller">图书馆</el-menu-item>
           <el-menu-item index="/resources_admin">教学资源</el-menu-item>
@@ -41,28 +37,19 @@
       <div class="page-header">
         <h1 class="admin-borrow-title">借阅管理</h1>
         <div class="search-toolbar">
-          <el-input
-            v-model="searchQuery"
-            placeholder="搜索图书名称/用户/编号"
-            clearable
-            style="width: 300px; margin-right: 10px;"
-            @clear="handleSearchClear"
-            @keyup.enter="handleSearch"
-          />
+          <el-input v-model="searchQuery" placeholder="搜索图书名称/用户/编号" clearable style="width: 300px; margin-right: 10px;"
+            @clear="handleSearchClear" @keyup.enter="handleSearch" />
           <el-button type="primary" @click="handleSearch">搜索</el-button>
           <el-button @click="resetSearch">重置</el-button>
         </div>
       </div>
-
+      <!-- 统计图表 -->
+      <div class="statistics-chart">
+        <div ref="chartRef" style="height: 300px"></div>
+      </div>
       <el-tabs v-model="activeTab" class="borrow-tabs">
         <el-tab-pane label="所有借阅记录" name="all">
-          <el-table
-            :data="filteredBorrowRecords"
-            style="width: 100%"
-            stripe
-            border
-            v-loading="loading"
-          >
+          <el-table :data="filteredBorrowRecords" style="width: 100%" stripe border v-loading="loading">
             <el-table-column prop="recordId" label="记录ID" width="100" sortable />
             <el-table-column prop="username" label="用户名" width="120" sortable />
             <el-table-column prop="bookName" label="图书名称" width="200" sortable />
@@ -91,27 +78,13 @@
             </el-table-column>
             <el-table-column label="操作" width="180" fixed="right">
               <template #default="{row}">
-                <el-button
-                  v-if="row.status === 'borrowed'"
-                  size="small"
-                  type="warning"
-                  @click="handleAdminRenew(row)"
-                >
+                <el-button v-if="row.status === 'borrowed'" size="small" type="warning" @click="handleAdminRenew(row)">
                   续借
                 </el-button>
-                <el-button
-                  v-if="row.status === 'borrowed'"
-                  size="small"
-                  type="danger"
-                  @click="handleAdminReturn(row)"
-                >
+                <el-button v-if="row.status === 'borrowed'" size="small" type="danger" @click="handleAdminReturn(row)">
                   归还
                 </el-button>
-                <el-button
-                  size="small"
-                  type="info"
-                  @click="showRecordDetails(row)"
-                >
+                <el-button size="small" type="info" @click="showRecordDetails(row)">
                   详情
                 </el-button>
               </template>
@@ -119,26 +92,14 @@
           </el-table>
 
           <div class="pagination-container">
-            <el-pagination
-              v-model:current-page="currentPage"
-              v-model:page-size="pageSize"
-              :total="totalRecords"
-              :page-sizes="[10, 20, 50, 100]"
-              layout="total, sizes, prev, pager, next, jumper"
-              @size-change="handleSizeChange"
-              @current-change="handleCurrentChange"
-            />
+            <el-pagination v-model:current-page="currentPage" v-model:page-size="pageSize" :total="totalRecords"
+              :page-sizes="[10, 20, 50, 100]" layout="total, sizes, prev, pager, next, jumper"
+              @size-change="handleSizeChange" @current-change="handleCurrentChange" />
           </div>
         </el-tab-pane>
 
         <el-tab-pane label="逾期记录" name="overdue">
-          <el-table
-            :data="overdueRecords"
-            style="width: 100%"
-            stripe
-            border
-            v-loading="loading"
-          >
+          <el-table :data="overdueRecords" style="width: 100%" stripe border v-loading="loading">
             <el-table-column prop="recordId" label="记录ID" width="100" />
             <el-table-column prop="username" label="用户名" width="120" />
             <el-table-column prop="bookName" label="图书名称" width="200" />
@@ -162,18 +123,10 @@
             </el-table-column>
             <el-table-column label="操作" width="180" fixed="right">
               <template #default="{row}">
-                <el-button
-                  size="small"
-                  type="danger"
-                  @click="handleAdminReturn(row)"
-                >
+                <el-button size="small" type="danger" @click="handleAdminReturn(row)">
                   归还
                 </el-button>
-                <el-button
-                  size="small"
-                  type="warning"
-                  @click="sendReminder(row)"
-                >
+                <el-button size="small" type="warning" @click="sendReminder(row)">
                   催还
                 </el-button>
               </template>
@@ -207,11 +160,7 @@
     </footer>
 
     <!-- 借阅记录详情对话框 -->
-    <el-dialog
-      v-model="detailDialogVisible"
-      title="借阅记录详情"
-      width="50%"
-    >
+    <el-dialog v-model="detailDialogVisible" title="借阅记录详情" width="50%">
       <el-descriptions :column="2" border>
         <el-descriptions-item label="记录ID">{{ currentRecord.recordId }}</el-descriptions-item>
         <el-descriptions-item label="用户名">{{ currentRecord.username }}</el-descriptions-item>
@@ -241,11 +190,7 @@
     </el-dialog>
 
     <!-- 续借对话框 -->
-    <el-dialog
-      v-model="renewDialogVisible"
-      title="续借图书"
-      width="30%"
-    >
+    <el-dialog v-model="renewDialogVisible" title="续借图书" width="30%">
       <el-form :model="renewForm" label-width="100px">
         <el-form-item label="图书名称">
           <el-input v-model="renewForm.bookName" disabled />
@@ -272,17 +217,20 @@
         </span>
       </template>
     </el-dialog>
+
   </div>
+
+
 </template>
 
 <script setup>
-import { ref, computed, onMounted, watch } from 'vue'
+import { ref, computed, onMounted, watch, nextTick, onBeforeUnmount } from 'vue'
 import { useRouter, useRoute } from 'vue-router'
 import { ElMessage, ElMessageBox } from 'element-plus'
 import axios from 'axios'
 import userAvatar from '@/assets/photo/user.png'
 import { format } from 'date-fns'
-
+import * as echarts from 'echarts';
 
 const router = useRouter()
 const route = useRoute()
@@ -492,13 +440,126 @@ const sendReminder = async (record) => {
     ElMessage.error('发送催还通知失败')
   }
 }
+// 添加统计数据的计算属性
+const statsData = computed(() => {
+  const stats = {
+    borrowed: 0,
+    returned: 0,
+    overdue: 0
+  };
 
+  allBorrowRecords.value.forEach(record => {
+    if (record.status === 'borrowed') {
+      stats.borrowed++;
+    } else if (record.status === 'returned') {
+      stats.returned++;
+    } else if (record.status === 'overdue') {
+      stats.overdue++;
+    }
+  });
 
+  return stats;
+});
+
+// 添加图表引用和初始化方法
+const chartRef = ref(null);
+let chartInstance = null;
+
+const initChart = () => {
+  if (!chartRef.value) return;
+
+  chartInstance = echarts.init(chartRef.value);
+
+  const option = {
+    title: {
+      text: '借阅统计',
+      left: 'center'
+    },
+    tooltip: {
+      trigger: 'item',
+      formatter: '{a} <br/>{b}: {c} ({d}%)'
+    },
+    legend: {
+      orient: 'horizontal',
+      bottom: 10,
+      data: ['已借已还', '已借未还', '逾期记录']
+    },
+    series: [
+      {
+        name: '借阅统计',
+        type: 'pie',
+        radius: ['50%', '70%'],
+        avoidLabelOverlap: false,
+        itemStyle: {
+          borderRadius: 10,
+          borderColor: '#fff',
+          borderWidth: 2
+        },
+        label: {
+          show: false,
+          position: 'center'
+        },
+        emphasis: {
+          label: {
+            show: true,
+            fontSize: '18',
+            fontWeight: 'bold'
+          }
+        },
+        labelLine: {
+          show: false
+        },
+        data: [
+          { value: statsData.value.returned, name: '已借已还', itemStyle: { color: '#67C23A' } },
+          { value: statsData.value.borrowed, name: '已借未还', itemStyle: { color: '#409EFF' } },
+          { value: statsData.value.overdue, name: '逾期记录', itemStyle: { color: '#F56C6C' } }
+        ]
+      }
+    ]
+  };
+
+  chartInstance.setOption(option);
+};
+// 监听统计数据变化，更新图表
+watch(statsData, () => {
+  if (chartInstance) {
+    chartInstance.setOption({
+      series: [{
+        data: [
+          { value: statsData.value.returned, name: '已借已还' },
+          { value: statsData.value.borrowed, name: '已借未还' },
+          { value: statsData.value.overdue, name: '逾期记录' }
+        ]
+      }]
+    });
+  }
+}, { deep: true });
+
+// 在数据加载完成后初始化图表
+watch(allBorrowRecords, () => {
+  if (allBorrowRecords.value.length > 0) {
+    nextTick(() => {
+      initChart();
+    });
+  }
+}, { immediate: true });
+// 添加窗口大小变化时的响应式调整
+const handleResize = () => {
+  if (chartInstance) {
+    chartInstance.resize();
+  }
+};
 
 // 组件挂载时获取数据
 onMounted(() => {
   fetchAllBorrowRecords()
 })
+onBeforeUnmount(() => {
+  window.removeEventListener('resize', handleResize);
+  if (chartInstance) {
+    chartInstance.dispose();
+  }
+});
 </script>
 
 <style scoped>
@@ -626,7 +687,31 @@ onMounted(() => {
   font-size: 14px;
   color: #c0c4cc;
 }
+/* 修改图表样式部分 */
+.statistics-chart {
+  margin: 20px 0;
+  padding: 20px;
+  background-color: #fff;
+  border-radius: 4px;
+  box-shadow: 0 2px 12px 0 rgba(0, 0, 0, 0.1);
+  border: 1px solid #ebeef5;
+}
 
+.statistics-chart div {
+  width: 100%;
+  height: 300px;
+}
+
+/* 确保图表在移动端也能正常显示 */
+@media (max-width: 768px) {
+  .statistics-chart {
+    padding: 10px;
+  }
+
+  .statistics-chart div {
+    height: 250px;
+  }
+}
 /* 响应式设计 */
 @media (max-width: 768px) {
   .header {
@@ -657,5 +742,6 @@ onMounted(() => {
   .footer-section {
     margin-bottom: 20px;
   }
+  
 }
 </style>
